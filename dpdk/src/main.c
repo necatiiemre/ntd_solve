@@ -457,6 +457,10 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
+    // Runtime flags for ATE mode — used in both init and shutdown sections
+    bool health_active = false;
+    bool ptp_active = false;
+
 #if ENABLE_RAW_SOCKET_PORTS
     // Start raw socket workers (only if initialization succeeded)
     if (raw_ports_initialized)
@@ -474,10 +478,6 @@ int main(int argc, char const *argv[])
             printf("Raw socket workers started successfully\n");
         }
     }
-
-    // Runtime flags for ATE mode — used in both init and shutdown sections
-    bool health_active = false;
-    bool ptp_active = false;
 
     // Initialize and start Health Monitor (runs on Port 13, independent from PRBS)
     // Disabled in ATE mode via ATE_HEALTH_MONITOR_ENABLED flag

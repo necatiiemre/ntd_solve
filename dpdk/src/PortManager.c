@@ -245,7 +245,7 @@ void portNumaNodesMatch(struct ports_config *config)
 {
     for (uint16_t port = 0; port < config->nb_ports; port++)
     {
-        config->ports[port].numa_node = rte_eth_dev_socket_id(port);
+        config->ports[port].numa_node = rte_eth_dev_socket_id(config->ports[port].port_id);
     }
 }
 
@@ -253,13 +253,18 @@ void lcorePortAssign(struct ports_config *config)
 {
     for (uint16_t port = 0; port < config->nb_ports; port++)
     {
-        uint16_t cores = MAX_LCORE - 1;
+        int cores = MAX_LCORE - 1;
         uint16_t *lcore_list = socket_to_lcore[config->ports[port].numa_node];
         uint16_t *unused_lcore_list = unused_socket_to_lcore[config->ports[port].numa_node];
-        
+
         // Assign TX cores
         for (uint16_t tx_core = 0; tx_core < NUM_TX_CORES; tx_core++)
         {
+            if (cores < 0)
+            {
+                printf("Warning: No more lcores available for port %u TX core %u\n", port, tx_core);
+                break;
+            }
             if (unused_lcore_list[cores] != 0)
             {
                 uint16_t lcore = lcore_list[cores];
@@ -283,6 +288,11 @@ void lcorePortAssign(struct ports_config *config)
         // Assign RX cores
         for (uint16_t rx_core = 0; rx_core < NUM_RX_CORES; rx_core++)
         {
+            if (cores < 0)
+            {
+                printf("Warning: No more lcores available for port %u RX core %u\n", port, rx_core);
+                break;
+            }
             if (unused_lcore_list[cores] != 0)
             {
                 uint16_t lcore = lcore_list[cores];
