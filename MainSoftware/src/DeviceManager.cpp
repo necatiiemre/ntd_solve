@@ -15,7 +15,11 @@ DeviceManager::~DeviceManager()
     // Destructor - disconnect all devices
     for (const auto &device : m_connectedDevices)
     {
-        disconnect(device);
+        try {
+            disconnect(device);
+        } catch (...) {
+            // Suppress exceptions in destructor
+        }
     }
 }
 

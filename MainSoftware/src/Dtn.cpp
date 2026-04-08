@@ -64,7 +64,7 @@ bool Dtn::latencyTestSequence()
             }
         }
     }
-    return 0;
+    return true;
 }
 
 bool Dtn::askQuestion(const std::string &question)

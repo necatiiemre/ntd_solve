@@ -337,7 +337,13 @@ void TDKLambdaPSU::setVoltageWithRamp(double voltage, double ramp_rate) {
 
     double current_voltage = getVoltage();
     double difference = std::abs(voltage - current_voltage);
+    if (difference < 0.001) {
+        return;
+    }
     double steps = difference / ramp_rate * 10;
+    if (steps < 1.0) {
+        steps = 1.0;
+    }
     double step_voltage = (voltage - current_voltage) / steps;
 
     for (int i = 0; i < static_cast<int>(steps); ++i) {
@@ -397,7 +403,13 @@ void TDKLambdaPSU::setCurrentWithRamp(double current, double ramp_rate) {
 
     double current_current = getCurrent();
     double difference = std::abs(current - current_current);
+    if (difference < 0.001) {
+        return;
+    }
     double steps = difference / ramp_rate * 10;
+    if (steps < 1.0) {
+        steps = 1.0;
+    }
     double step_current = (current - current_current) / steps;
 
     for (int i = 0; i < static_cast<int>(steps); ++i) {
@@ -526,7 +538,7 @@ std::string TDKLambdaPSU::sendCommand(const std::string& command) {
     }
 
     std::string cmd = command;
-    if (cmd.back() != '\n') {
+    if (cmd.empty() || cmd.back() != '\n') {
         cmd += '\n';
     }
 
@@ -542,7 +554,7 @@ std::string TDKLambdaPSU::sendQuery(const std::string& query) const {
     }
 
     std::string cmd = query;
-    if (cmd.back() != '\n') {
+    if (cmd.empty() || cmd.back() != '\n') {
         cmd += '\n';
     }
 

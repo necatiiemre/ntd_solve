@@ -59,7 +59,15 @@ std::string Server::executeIdracCommand(const std::string& command) {
         return "";
     }
 
-    std::string ssh_cmd = "sshpass -p '" + m_idrac_password + "' "
+    // Escape single quotes in password for shell safety
+    std::string escaped_password = m_idrac_password;
+    std::string::size_type pos = 0;
+    while ((pos = escaped_password.find('\'', pos)) != std::string::npos) {
+        escaped_password.replace(pos, 1, "'\\''");
+        pos += 4;
+    }
+
+    std::string ssh_cmd = "sshpass -p '" + escaped_password + "' "
                           "ssh -o StrictHostKeyChecking=no "
                           "-o ConnectTimeout=10 "
                           + m_idrac_username + "@" + m_idrac_ip + " "

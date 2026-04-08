@@ -112,7 +112,7 @@ int main(int argc, char const *argv[])
     );
     printf("PRBS Method: Sequence-based with ~268MB cache per port\n");
     printf("Payload format: [8-byte sequence][PRBS-31 data]\n");
-    printf("WARM-UP: First 60 seconds (stats will reset at 60s)\n");
+    printf("WARM-UP: First 120 seconds (stats will reset at 120s)\n");
     printf("Sequence Validation: Enabled (Lost/Out-of-Order/Duplicate detection)\n");
 #if ENABLE_RAW_SOCKET_PORTS
     printf("Raw Socket Ports: Enabled (%d ports, multi-target)\n", MAX_RAW_SOCKET_PORTS);
@@ -595,7 +595,7 @@ int main(int argc, char const *argv[])
 #endif
 
     printf("\n=== Running (Press Ctrl+C to stop) ===\n");
-    printf("  WARM-UP PHASE: First 60 seconds (stats will reset)\n\n");
+    printf("  WARM-UP PHASE: First 120 seconds (stats will reset)\n\n");
 
     // Previous TX/RX bytes for per-second rate calculation
     static uint64_t prev_tx_bytes[MAX_PORTS] = {0};
@@ -734,7 +734,7 @@ int main(int argc, char const *argv[])
     }
 #endif
 
-    printf("Waiting 5 seconds for RX counters to flush...\n");
+    printf("Waiting 15 seconds for RX counters to flush...\n");
     sleep(15);
 
     // Wait for all DPDK workers to stop

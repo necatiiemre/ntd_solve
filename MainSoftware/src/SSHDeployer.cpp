@@ -132,8 +132,18 @@ std::string SSHDeployer::getLogPrefix() const {
     return "[" + m_name + "]";
 }
 
+static std::string escapeShellSingleQuotes(const std::string& str) {
+    std::string escaped = str;
+    std::string::size_type pos = 0;
+    while ((pos = escaped.find('\'', pos)) != std::string::npos) {
+        escaped.replace(pos, 1, "'\\''");
+        pos += 4;
+    }
+    return escaped;
+}
+
 std::string SSHDeployer::buildSSHCommand(const std::string& remote_command) const {
-    return "sshpass -p '" + m_password + "' "
+    return "sshpass -p '" + escapeShellSingleQuotes(m_password) + "' "
            "ssh -o StrictHostKeyChecking=no "
            "-o ConnectTimeout=10 "
            + m_username + "@" + m_host + " "
@@ -142,7 +152,7 @@ std::string SSHDeployer::buildSSHCommand(const std::string& remote_command) cons
 
 std::string SSHDeployer::buildSCPCommand(const std::string& local_path,
                                           const std::string& remote_path) const {
-    return "sshpass -p '" + m_password + "' "
+    return "sshpass -p '" + escapeShellSingleQuotes(m_password) + "' "
            "scp -o StrictHostKeyChecking=no "
            "-o ConnectTimeout=10 "
            + local_path + " "

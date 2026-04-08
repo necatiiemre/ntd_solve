@@ -4,7 +4,7 @@
 void socketToLcore()
 {
     unsigned lcore_id;
-    for (unsigned socket = 0; socket <= MAX_SOCKET; socket++)
+    for (unsigned socket = 0; socket < MAX_SOCKET; socket++)
     {
         uint16_t lcore_index = 0;
         RTE_LCORE_FOREACH(lcore_id)
