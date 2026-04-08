@@ -418,7 +418,9 @@ class LogParser:
         if start_dt:
             new_finish_dt = start_dt + timedelta(seconds=final_count)
             # Tarih formatını orijinal formata sadık kalarak güncelle (Örn: February 22, 2026 01:50:00)
-            if "February" in start_time_str or "January" in start_time_str: # Kabaca bir kontrol
+            _MONTH_NAMES = ("January", "February", "March", "April", "May", "June",
+                            "July", "August", "September", "October", "November", "December")
+            if any(m in start_time_str for m in _MONTH_NAMES):
                 self.data["metadata"]["Test Finish Time"] = new_finish_dt.strftime("%B %d, %Y %H:%M:%S")
             else:
                 self.data["metadata"]["Test Finish Time"] = new_finish_dt.strftime("%d/%m/%Y %H:%M:%S")
@@ -1305,7 +1307,8 @@ def main():
         generated_parts = pool.map(worker_generate_pdf, worker_tasks)
 
     if len(generated_parts) == 1:
-        os.rename(generated_parts[0], args.output)
+        import shutil
+        shutil.move(generated_parts[0], args.output)
     else:
         try:
             from pypdf import PdfWriter
@@ -1316,7 +1319,9 @@ def main():
             for pdf in generated_parts: os.remove(pdf)
         except ImportError:
             import shutil
+            print(f"WARNING: pypdf not installed. Cannot merge {len(generated_parts)} PDF parts. Using first part only.")
             shutil.move(generated_parts[0], args.output)
+            for pdf in generated_parts[1:]: os.remove(pdf)
 
     duration = (datetime.now() - start_time).total_seconds()
     print(f"[{datetime.now().strftime('%H:%M:%S')}] SUCCESS! Process completed in {duration:.2f} seconds.")

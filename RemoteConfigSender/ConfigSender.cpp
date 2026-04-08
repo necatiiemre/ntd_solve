@@ -181,12 +181,17 @@ bool ConfigSender::sendRawEthernet(const std::string& interface_name,
         return false;
     }
 
-    std::string dest_ip = parseDestIP(raw_packet);
-    uint16_t dest_port = parseDestPort(raw_packet);
+    if (size >= MIN_PACKET_LEN) {
+        std::string dest_ip = parseDestIP(raw_packet);
+        uint16_t dest_port = parseDestPort(raw_packet);
 
-    DEBUG_LOG("[ConfigSender] L2 Raw -> " << interface_name << " | "
-              << dest_ip << ":" << dest_port
-              << " | " << sent << " bytes OK");
+        DEBUG_LOG("[ConfigSender] L2 Raw -> " << interface_name << " | "
+                  << dest_ip << ":" << dest_port
+                  << " | " << sent << " bytes OK");
+    } else {
+        DEBUG_LOG("[ConfigSender] L2 Raw -> " << interface_name << " | "
+                  << sent << " bytes OK");
+    }
 
     return true;
 }
@@ -324,8 +329,6 @@ bool ConfigSender::startMonitoringAsync(const std::string& interface_name, int t
 }
 
 void ConfigSender::stopMonitoring() {
-    if (!m_monitoring_active) return;
-
     m_stop_requested = true;
 
     if (m_monitor_thread.joinable()) {
