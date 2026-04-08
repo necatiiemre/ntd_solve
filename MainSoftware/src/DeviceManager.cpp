@@ -13,7 +13,9 @@ DeviceManager::DeviceManager()
 DeviceManager::~DeviceManager()
 {
     // Destructor - disconnect all devices
-    for (const auto &device : m_connectedDevices)
+    // Copy the list since disconnect() modifies m_connectedDevices
+    auto devices_copy = m_connectedDevices;
+    for (const auto &device : devices_copy)
     {
         try {
             disconnect(device);

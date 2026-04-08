@@ -112,6 +112,12 @@ bool Hsn::configureSequence()
         ErrorPrinter::warn("PSU", "HSN: PSU G30 still ON, retry " + std::to_string(retry + 1) + "/3...");
         g_DeviceManager.enableOutput(PSUG30, false);
     }
+    if (g_DeviceManager.isOutputEnabled(PSUG30))
+    {
+        ErrorPrinter::error("PSU", "HSN: PSU G30 output could not be verified OFF after 3 retries!");
+        shutdown.executeShutdown();
+        return false;
+    }
     shutdown.unregisterPsuOutputEnabled(PSUG30);
 
     // Record Power Off Time when PSU output is disabled

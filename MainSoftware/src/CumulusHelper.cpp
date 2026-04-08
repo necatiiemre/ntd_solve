@@ -1213,14 +1213,14 @@ bool CumulusHelper::configureSequence()
         return false;
     }
 
-    configureSwp1325();
-    configureSwp1426();
-    configureSwp1527();
-    configureSwp1628();
-    configureSwp1729();
-    configureSwp1830();
-    configureSwp1931();
-    configureSwp2032();
+    if (!configureSwp1325()) return false;
+    if (!configureSwp1426()) return false;
+    if (!configureSwp1527()) return false;
+    if (!configureSwp1628()) return false;
+    if (!configureSwp1729()) return false;
+    if (!configureSwp1830()) return false;
+    if (!configureSwp1931()) return false;
+    if (!configureSwp2032()) return false;
 
     // // 2. nv set interface swp25s3 bridge domain br_default vlan 100
     // if (!addVLAN("swp25s3", 100))

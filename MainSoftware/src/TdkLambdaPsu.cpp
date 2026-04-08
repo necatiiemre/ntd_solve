@@ -72,12 +72,14 @@ public:
         // Convert IP address
         if (inet_pton(AF_INET, m_config.ip_address.c_str(), &server_addr.sin_addr) <= 0) {
             ::close(m_sockfd);
+            m_sockfd = -1;
             throw PSUException("Invalid IP address: " + m_config.ip_address);
         }
 
         // Connect to server
         if (connect(m_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
             ::close(m_sockfd);
+            m_sockfd = -1;
             throw PSUException("Failed to connect to " + m_config.ip_address + ":" +
                              std::to_string(m_config.tcp_port));
         }

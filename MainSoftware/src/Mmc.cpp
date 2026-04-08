@@ -112,6 +112,12 @@ bool Mmc::configureSequence()
         ErrorPrinter::warn("PSU", "MMC: PSU G300 still ON, retry " + std::to_string(retry + 1) + "/3...");
         g_DeviceManager.enableOutput(PSUG300, false);
     }
+    if (g_DeviceManager.isOutputEnabled(PSUG300))
+    {
+        ErrorPrinter::error("PSU", "MMC: PSU G300 output could not be verified OFF after 3 retries!");
+        shutdown.executeShutdown();
+        return false;
+    }
     shutdown.unregisterPsuOutputEnabled(PSUG300);
 
     // Record Power Off Time when PSU output is disabled
