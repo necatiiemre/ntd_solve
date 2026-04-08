@@ -35,7 +35,10 @@ int main(int argc, char const *argv[])
     // Record Software End Time after configure sequence completes
     g_ReportManager.recordSoftwareEndTime();
 
-    g_ReportManager.writeReportHeader();
+    if (!g_ReportManager.writeReportHeader())
+    {
+        ErrorPrinter::warn("SYSTEM", "Failed to write report header to log file!");
+    }
 
     // Create PDF report after test
     if (!g_ReportManager.createPdfReport())

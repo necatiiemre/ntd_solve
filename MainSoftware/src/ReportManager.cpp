@@ -340,28 +340,19 @@ bool ReportManager::writeReportHeader()
 {
     std::string logDir = getLogPathForUnit();
     std::string logFile = logDir + "/" + "dpdk_app.log";
+    std::string tmpFile = logFile + ".tmp";
 
-    // Read existing content if present
-    std::string existingContent;
-    {
-        std::ifstream inFile(logFile);
-        if (inFile.is_open())
-        {
-            std::stringstream ss;
-            ss << inFile.rdbuf();
-            existingContent = ss.str();
-            inFile.close();
-        }
-    }
-
-    // Open the file and write report header at the beginning
-    std::ofstream outFile(logFile);
+    // Write header to a temp file, then stream the original log content
+    // This avoids loading the entire log file into memory (which fails for
+    // long tests with 100s of MB log files, causing OOM or data loss)
+    std::ofstream outFile(tmpFile, std::ios::binary);
     if (!outFile.is_open())
     {
-        std::cerr << "Error: Could not open log file: " << logFile << std::endl;
+        std::cerr << "Error: Could not create temp file: " << tmpFile << std::endl;
         return false;
     }
 
+    // Write report header
     outFile << "========================================" << std::endl;
     outFile << "         TEST REPORT" << std::endl;
     outFile << "========================================" << std::endl;
@@ -379,13 +370,40 @@ bool ReportManager::writeReportHeader()
     outFile << "========================================" << std::endl;
     outFile << std::endl;
 
-    // Append existing content
-    if (!existingContent.empty())
+    // Stream existing log content chunk by chunk (no full file load into RAM)
     {
-        outFile << existingContent;
+        std::ifstream inFile(logFile, std::ios::binary);
+        if (inFile.is_open())
+        {
+            char buffer[65536];
+            while (inFile.read(buffer, sizeof(buffer)) || inFile.gcount() > 0)
+            {
+                outFile.write(buffer, inFile.gcount());
+                if (!outFile.good())
+                {
+                    std::cerr << "Error: Failed to write log content to temp file" << std::endl;
+                    outFile.close();
+                    std::filesystem::remove(tmpFile);
+                    return false;
+                }
+            }
+            inFile.close();
+        }
     }
 
     outFile.close();
+
+    // Replace original file with temp file (atomic on same filesystem)
+    try
+    {
+        std::filesystem::rename(tmpFile, logFile);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error: Could not replace log file: " << e.what() << std::endl;
+        std::filesystem::remove(tmpFile);
+        return false;
+    }
 
     DEBUG_LOG("Report header written to: " << logFile);
 
